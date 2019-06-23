@@ -1,86 +1,83 @@
-class SwapiService {
-	_apiBase = 'https://swapi.co/api/';
+export default class SwapiService {
 
-	async getResource(url) {
-		const request = await fetch(url);
+  _apiBase = 'https://swapi.co/api';
 
-		if (!request.ok) {
-			throw new Error('Could not fetch url....');
-		}
-		const response = await request.json();
-		//will return promise
-		return response;
-	}
+  getResource = async (url) => {
+    const res = await fetch(`${this._apiBase}${url}`);
 
-	async getAllPeople() {
-		const res = await this.getResource(`${this._apiBase}people/`);
-		return res.results.map(this.transformPerson);
-	}
+    if (!res.ok) {
+      throw new Error(`Could not fetch ${url}` +
+        `, received ${res.status}`)
+    }
+    return await res.json();
+  };
 
-	async getPerson(id) {
-		const person = await this.getResource(`${this._apiBase}people/${id}/`);
-		return this.transformPerson(person);
-	}
+  getAllPeople = async () => {
+    const res = await this.getResource(`/people/`);
+    return res.results.map(this._transformPerson);
+  };
 
-	async getAllPlanets() {
-		const res = await this.getResource(`${this._apiBase}planets/`);
-		return res.results.map(this.transformPlanet);
-	}
+  getPerson = async (id) => {
+    const person = await this.getResource(`/people/${id}/`);
+    return this._transformPerson(person);
+  };
 
-	async getPlanet(id) {
-		const planet = await this.getResource(`${this._apiBase}planets/${id}/`);
-		return this.transformPlanet(planet);
-	}
+  getAllPlanets = async () => {
+    const res = await this.getResource(`/planets/`);
+    return res.results.map(this._transformPlanet);
+  };
 
-	async getAllStarShips() {
-		const res = await this.getResource(`${this._apiBase}starships/`);
-		return res.results.map(this.transformShip);
-	}
+  getPlanet = async (id) => {
+    const planet = await this.getResource(`/planets/${id}/`);
+    return this._transformPlanet(planet);
+  };
 
-	async getStarShip(id) {
-		const ship = await this.getResource(`${this._apiBase}starships/${id}/`);
-		return this.transformShip(ship);
-	}
+  getAllStarships = async () => {
+    const res = await this.getResource(`/starships/`);
+    return res.results.map(this._transformStarship);
+  };
 
-	extractId(item) {
-		const idRegex = /\/([0-9]*)\/$/;
-		const id = item.url.match(idRegex)[1];
-		return id;
-	}
+  getStarship = async (id) => {
+    const starship = this.getResource(`/starships/${id}/`);
+    return this._transformStarship(starship);
+  };
 
-	transformPlanet = data => {
-		return {
-			name: data.name,
-			population: data.population,
-			rotation: data.rotation_period,
-			diameter: data.diameter,
-			id: this.extractId(data)
-		};
-	};
+  _extractId = (item) => {
+    const idRegExp = /\/([0-9]*)\/$/;
+    return item.url.match(idRegExp)[1];
+  };
 
-	transformShip = data => {
-		return {
-			id: this.extractId(data),
-			name: data.name,
-			model: data.model,
-			manufacturer: data.manufacturer,
-			costInCredits: data.costInCredits,
-			length: data.length,
-			crew: data.crew,
-			passengers: data.passengers,
-			cargoCapacity: data.cargoCapacity
-		};
-	};
+  _transformPlanet = (planet) => {
+    return {
+      id: this._extractId(planet),
+      name: planet.name,
+      population: planet.population,
+      rotationPeriod: planet.rotation_period,
+      diameter: planet.diameter
+    };
+  };
 
-	transformPerson = data => {
-		return {
-			id: this.extractId(data),
-			name: data.name,
-			gender: data.gender,
-			birthYear: data.birth_year,
-			eyeColor: data.eye_color
-		};
-	};
+  _transformStarship = (starship) => {
+    return {
+      id: this._extractId(starship),
+      name: starship.name,
+      model: starship.model,
+      manufacturer: starship.manufacturer,
+      costInCredits: starship.cost_in_credits,
+      length: starship.length,
+      crew: starship.crew,
+      passengers: starship.passengers,
+      cargoCapacity: starship.cargo_capacity
+    }
+  };
+
+  _transformPerson = (person) => {
+    return {
+      id: this._extractId(person),
+      name: person.name,
+      gender: person.gender,
+      birthYear: person.birth_year,
+      eyeColor: person.eye_color
+    }
+  }
 }
-
-export default SwapiService;
