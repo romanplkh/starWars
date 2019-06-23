@@ -1,51 +1,49 @@
 import React, { Component } from 'react';
 import './item-list.css';
-import Spinner from "../spinner/spinner";
+import Spinner from '../spinner/spinner';
 
 export default class ItemList extends Component {
+	state = {
+		itemList: null
+	};
 
-  state = {
-    itemList: null
-  };
+	componentDidMount() {
+		const { getData } = this.props;
 
-  componentDidMount() {
+		getData().then(itemList => {
+			this.setState({
+				itemList
+			});
+		});
+	}
 
-    const { getData } = this.props;
+	renderItems(arr) {
+		return arr.map(item => {
+			const { id } = item;
 
-    getData()
-      .then((itemList) => {
-        this.setState({
-          itemList
-        });
-      });
-  }
+			//This func will render what we want from the object we pass in. In this case it will be name.
+			const label = this.props.renderItem(item);
+			return (
+				<li
+					className="list-group-item"
+					key={id}
+					onClick={() => this.props.onItemSelected(id)}
+				>
+					{label}
+				</li>
+			);
+		});
+	}
 
-  renderItems(arr) {
-    return arr.map(({id, name}) => {
-      return (
-        <li className="list-group-item"
-            key={id}
-            onClick={() => this.props.onItemSelected(id)}>
-          {name}
-        </li>
-      );
-    });
-  }
+	render() {
+		const { itemList } = this.state;
 
-  render() {
+		if (!itemList) {
+			return <Spinner />;
+		}
 
-    const { itemList } = this.state;
+		const items = this.renderItems(itemList);
 
-    if (!itemList) {
-      return <Spinner />;
-    }
-
-    const items = this.renderItems(itemList);
-
-    return (
-      <ul className="item-list list-group">
-        {items}
-      </ul>
-    );
-  }
+		return <ul className="item-list list-group">{items}</ul>;
+	}
 }
